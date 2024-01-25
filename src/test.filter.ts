@@ -2,15 +2,16 @@ import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
-  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 
 @Catch()
 export class TestFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const req = ctx.getRequest();
     const res = ctx.getResponse();
+    const status = exception.getStatus();
 
     if (Array.isArray(res.executionFlow)) {
       res.executionFlow.push('in exception filter');
@@ -26,8 +27,8 @@ export class TestFilter implements ExceptionFilter {
     console.log('req', req.executionFlow);
     console.log('res', res.executionFlow);
 
-    res.json({
-      statusCode: HttpStatus.OK,
+    res.status(status).json({
+      statusCode: status,
     });
   }
 }

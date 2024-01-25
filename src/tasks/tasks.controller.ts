@@ -23,11 +23,34 @@ import { UpdateResult } from 'typeorm';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/auth/user.entity';
 import { GetUser } from 'src/auth/get-user.decorator';
+import { TestGuard } from './test.guard';
+import { Roles } from 'src/roles.decorator';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
   constructor(private tasksService: TasksService) {}
+
+  @UseGuards(TestGuard)
+  @Roles(['some role'])
+  @Get('test/guard')
+  testGuard(@Req() req: any, @Res() res: any) {
+    if (Array.isArray(res.executionFlow)) {
+      res.executionFlow.push('in tasks controller');
+    } else {
+      res.executionFlow = ['in tasks controller'];
+    }
+    if (Array.isArray(req.executionFlow)) {
+      req.executionFlow.push('in tasks controller');
+    } else {
+      req.executionFlow = ['in tasks controller'];
+    }
+
+    console.log('req', req.executionFlow);
+    console.log('res', res.executionFlow);
+
+    res.send('testing');
+  }
 
   @Get('test')
   test(@Req() req: any, @Res() res: any) {
